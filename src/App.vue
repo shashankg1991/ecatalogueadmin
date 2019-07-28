@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    eCatalogue Management
     <router-view/>
   </div>
 </template>

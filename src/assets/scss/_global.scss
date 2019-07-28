@@ -13,7 +13,7 @@ $white: #fff;
 body {
 	margin: 0;
 	color: $dark;
-	background: #E6ECF0;
+	background: $white;
 }
 
 html {
@@ -38,6 +38,15 @@ h4,
 h5,
 p {
 	margin: 0 0 0.5rem;
+}
+
+li{
+	width: 100%;
+}
+
+ul li{
+	list-style: none;
+	width: 100%;
 }
 
 h1 {

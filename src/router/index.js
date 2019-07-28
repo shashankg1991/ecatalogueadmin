@@ -3,7 +3,10 @@ import Router from 'vue-router'
 import firebase from 'firebase'
 
 import Login from '@/components/Login'
-import Dashboard from '@/components/Dashboard'
+import Users from '@/components/Users'
+import Items from '@/components/Items'
+import Categories from '@/components/Categories'
+import HomeScreen from '@/components/HomeScreen'
 
 Vue.use(Router)
 
@@ -12,7 +15,7 @@ const router = new Router({
   routes: [
     {
       path: '*',
-      redirect: '/dashboard'
+      redirect: '/home'
     },
     {
       path: '/login',
@@ -20,9 +23,33 @@ const router = new Router({
       component: Login
     },
     {
-      path: '/dashboard',
-      name: 'Dashboard',
-      component: Dashboard,
+      path: '/home',
+      name: 'HomeScreen',
+      component: HomeScreen,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/users',
+      name: 'Users',
+      component: Users,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/categories',
+      name: 'Categories',
+      component: Categories,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/items',
+      name: 'Items',
+      component: Items,
       meta: {
         requiresAuth: true
       }

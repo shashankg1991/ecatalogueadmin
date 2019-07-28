@@ -8,17 +8,34 @@ Vue.use(Vuex)
 fb.auth.onAuthStateChanged(user => {
   if (user) {
     store.commit('setCurrentUser', user)
-    console.error(fb.usersCollection)
     fb.usersCollection.orderBy('u_id').onSnapshot(querySnapshot => {
       let usersArray = []
       querySnapshot.forEach(doc => {
-        console.error(JSON.stringify(doc.data()))
         let user = doc.data()
-        user.id = doc.u_id
+        user.id = doc.id
         usersArray.push(user)
       })
-
       store.commit('setUsers', usersArray)
+    })
+
+    fb.itemsCollection.orderBy('u_id').onSnapshot(querySnapshot => {
+      let itemsArray = []
+      querySnapshot.forEach(doc => {
+        let item = doc.data()
+        item.id = doc.id
+        itemsArray.push(item)
+      })
+      store.commit('setItems', itemsArray)
+    })
+
+    fb.categoriesCollection.orderBy('u_id').onSnapshot(querySnapshot => {
+      let categoriesArray = []
+      querySnapshot.forEach(doc => {
+        let category = doc.data()
+        category.id = doc.id
+        categoriesArray.push(category)
+      })
+      store.commit('setCategories', categoriesArray)
     })
   }
 })
@@ -26,12 +43,16 @@ fb.auth.onAuthStateChanged(user => {
 export const store = new Vuex.Store({
   state: {
     currentUser: null,
-    users: []
+    users: [],
+    items: [],
+    categories: []
   },
   actions: {
     clearData ({ commit }) {
       commit('setCurrentUser', null)
       commit('setUsers', null)
+      commit('setItems', null)
+      commit('setCategories', null)
     }
   },
   mutations: {
@@ -43,6 +64,20 @@ export const store = new Vuex.Store({
         state.users = val
       } else {
         state.users = []
+      }
+    },
+    setItems (state, val) {
+      if (val) {
+        state.items = val
+      } else {
+        state.items = []
+      }
+    },
+    setCategories (state, val) {
+      if (val) {
+        state.categories = val
+      } else {
+        state.categories = []
       }
     }
   }
