@@ -7,12 +7,15 @@ const config = {
   authDomain: 'ecatalogue-fdbcd.firebaseapp.com',
   databaseURL: 'https://ecatalogue-fdbcd.firebaseio.com',
   projectId: 'ecatalogue-fdbcd',
-  storageBucket: ''
+  storageBucket: 'ecatalogue-fdbcd.appspot.com',
+  messagingSenderId: '913887357485',
+  appId: '1:913887357485:web:78f8d3adfdb04ae2'
 }
 firebase.initializeApp(config)
 
 // firebase utils
 const db = firebase.firestore()
+const storage = firebase.storage()
 const auth = firebase.auth()
 const currentUser = auth.currentUser
 
@@ -30,6 +33,7 @@ const categoriesCollection = db.collection('categories')
 export {
   db,
   auth,
+  storage,
   currentUser,
   usersCollection,
   itemsCollection,

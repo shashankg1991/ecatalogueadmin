@@ -38,49 +38,49 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
-import { uuid } from "vue-uuid";
-const fb = require("../firebaseConfig.js");
+import { mapState } from 'vuex'
+import { uuid } from 'vue-uuid'
+const fb = require('../firebaseConfig.js')
 export default {
-  data() {
+  data () {
     return {
-      searchterm: "",
+      searchterm: '',
       modifiedUser: {
-        id: "",
-        name: "",
-        password: "",
-        u_id: ""
+        id: '',
+        name: '',
+        password: '',
+        u_id: ''
       },
       showAddsection: false,
       isEdit: false
-    };
+    }
   },
   computed: {
-    ...mapState(["currentUser", "users"]),
-    filteredUsers: function() {
+    ...mapState(['currentUser', 'users']),
+    filteredUsers: function () {
       return this.users.filter(user => {
         return user.name
           .toLowerCase()
           .trim()
-          .match(this.searchterm.toLowerCase().trim());
-      });
+          .match(this.searchterm.toLowerCase().trim())
+      })
     }
   },
   methods: {
-    addUser() {
+    addUser () {
       if (this.isEdit) {
         fb.usersCollection
           .doc(this.modifiedUser.id)
           .set(this.modifiedUser)
           .then(doc => {
-            this.modifiedUser.name = "";
-            this.modifiedUser.password = "";
-            this.showAddsection = false;
-            this.isEdit = false;
+            this.modifiedUser.name = ''
+            this.modifiedUser.password = ''
+            this.showAddsection = false
+            this.isEdit = false
           })
           .catch(err => {
-            console.log(err);
-          });
+            console.log(err)
+          })
       } else {
         fb.usersCollection
           .add({
@@ -89,35 +89,35 @@ export default {
             password: this.modifiedUser.password
           })
           .then(doc => {
-            this.modifiedUser.name = "";
-            this.modifiedUser.password = "";
-            this.showAddsection = false;
-            this.isEdit = false;
+            this.modifiedUser.name = ''
+            this.modifiedUser.password = ''
+            this.showAddsection = false
+            this.isEdit = false
           })
           .catch(err => {
-            console.log(err);
-          });
+            console.log(err)
+          })
       }
     },
-    editUser(user) {
-      this.isEdit = true;
-      this.modifiedUser = user;
-      this.showAddsection = true;
+    editUser (user) {
+      this.isEdit = true
+      this.modifiedUser = user
+      this.showAddsection = true
     },
-    deleteUser(id) {
+    deleteUser (id) {
       fb.usersCollection
         .doc(id)
         .delete()
         .catch(err => {
-          console.log(err);
-        });
+          console.log(err)
+        })
     },
-    viewAddSection() {
-      this.showAddsection = true;
+    viewAddSection () {
+      this.showAddsection = true
     },
-    closePostModal() {
-      this.showAddsection = false;
+    closePostModal () {
+      this.showAddsection = false
     }
   }
-};
+}
 </script>
