@@ -79,6 +79,12 @@ export const store = new Vuex.Store({
       } else {
         state.categories = []
       }
+    },
+    clearData (state) {
+      state.currentUser = null
+      state.users = []
+      state.items = []
+      state.categories = []
     }
   }
 })
