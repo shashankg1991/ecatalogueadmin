@@ -29,6 +29,7 @@ db.settings(settings)
 const usersCollection = db.collection('users')
 const itemsCollection = db.collection('items')
 const categoriesCollection = db.collection('categories')
+const userpermissionsCollection = db.collection('userpermissions')
 
 export {
   db,
@@ -37,5 +38,6 @@ export {
   currentUser,
   usersCollection,
   itemsCollection,
-  categoriesCollection
+  categoriesCollection,
+  userpermissionsCollection
 }

@@ -1,36 +1,67 @@
 <template>
-  <div id="dashboard">
-    <router-link to="/home">Home</router-link>
-    <section v-if="!showAddsection">
-      <a @click="viewAddSection">Add new user</a>
-      <input type="text" v-model="searchterm" placeholder="Search users" />
-      <ul v-if="filteredUsers.length">
-        <li v-for="user in filteredUsers" :key="user.u_id" class="post">
-          {{ user.id }}
-          {{ user.u_id }}
-          {{ user.name }}
-          {{ user.password }}
-          <button
-            @click="editUser(user)"
-          >Edit</button>
-          <button @click="deleteUser(user.id)">Delete</button>
-        </li>
-      </ul>
+  <div class="marginTop">
+    <b-container v-if="!showEditPermissionsSection">
+      <b-form-input type="text" v-model="searchterm" placeholder="Search users"></b-form-input>
+      <span hidden>{{userpermissions}}</span>
+      <b-table
+        borderless
+        outlined
+        hover
+        class="marginTop"
+        v-if="filteredUsers.length"
+        :items="filteredUsers"
+        :fields="fields"
+      >
+        <template slot="userpermission" slot-scope="data">
+          <span v-if="data.item.userpermission">
+            <b-badge v-if="data.item.userpermission.read">Read: {{data.item.userpermission.read}}</b-badge>
+            <b-badge v-if="data.item.userpermission.write">Write: {{data.item.userpermission.write}}</b-badge>
+            <b-badge v-if="!data.item.userpermission.read">Read: false</b-badge>
+            <b-badge v-if="!data.item.userpermission.write">Write: fasle</b-badge>
+          </span>
+          <span v-if="!data.item.userpermission">
+            <b-badge>Read: false</b-badge>
+            <b-badge>Write: false</b-badge>
+          </span>
+        </template>
+        <template slot="actions" slot-scope="data">
+          <b-button
+            variant="outline-primary"
+            @click="modifyUserpermissions(data.item)"
+          >Edit Permissions</b-button>
+        </template>
+      </b-table>
+
       <div v-else>
         <p class="no-results">There are currently no users</p>
       </div>
-    </section>
+    </b-container>
     <transition name="fade">
-      <div v-if="showAddsection" class="p-modal">
+      <div v-if="showEditPermissionsSection" class="p-modal">
         <div class="p-container">
           <a @click="closePostModal" class="close">X</a>
-          <div class="post">
-            Name :
-            <input v-model="modifiedUser.name" />
-            password :
-            <input v-model="modifiedUser.password" />
-            <button v-if="modifiedUser.name && modifiedUser.password" @click="addUser">Save</button>
-          </div>
+          <b-form class="post">
+            Permissions for {{modifiedUserpermissions.name}}
+            <b-form-group label="Read:" label-for="read">
+              <b-form-select
+                id="read"
+                required
+                placeholder="Read"
+                v-model="modifiedUserpermissions.read"
+                :options="permissionOptions"
+              ></b-form-select>
+            </b-form-group>
+            <b-form-group label="Write:" label-for="write">
+              <b-form-select
+                id="write"
+                required
+                placeholder="Write"
+                v-model="modifiedUserpermissions.write"
+                :options="permissionOptions"
+              ></b-form-select>
+            </b-form-group>
+            <b-button center variant="secondary" class="marginTop" @click="addUserPermissions">Save</b-button>
+          </b-form>
         </div>
       </div>
     </transition>
@@ -39,24 +70,25 @@
 
 <script>
 import { mapState } from 'vuex'
-import { uuid } from 'vue-uuid'
 const fb = require('../firebaseConfig.js')
 export default {
   data () {
     return {
+      permissionOptions: [true, false],
+      fields: ['name', 'userpermission', 'actions'],
       searchterm: '',
-      modifiedUser: {
+      modifiedUserpermissions: {
         id: '',
         name: '',
-        password: '',
-        u_id: ''
+        read: '',
+        write: ''
       },
-      showAddsection: false,
+      showEditPermissionsSection: false,
       isEdit: false
     }
   },
   computed: {
-    ...mapState(['currentUser', 'users']),
+    ...mapState(['currentUser', 'users', 'userpermissions']),
     filteredUsers: function () {
       return this.users.filter(user => {
         return user.name
@@ -67,56 +99,49 @@ export default {
     }
   },
   methods: {
-    addUser () {
-      if (this.isEdit) {
-        fb.usersCollection
-          .doc(this.modifiedUser.id)
-          .set(this.modifiedUser)
-          .then(doc => {
-            this.modifiedUser.name = ''
-            this.modifiedUser.password = ''
-            this.showAddsection = false
-            this.isEdit = false
-          })
-          .catch(err => {
-            console.log(err)
-          })
-      } else {
-        fb.usersCollection
-          .add({
-            u_id: uuid.v1(),
-            name: this.modifiedUser.name,
-            password: this.modifiedUser.password
-          })
-          .then(doc => {
-            this.modifiedUser.name = ''
-            this.modifiedUser.password = ''
-            this.showAddsection = false
-            this.isEdit = false
-          })
-          .catch(err => {
-            console.log(err)
-          })
-      }
-    },
-    editUser (user) {
-      this.isEdit = true
-      this.modifiedUser = user
-      this.showAddsection = true
-    },
-    deleteUser (id) {
-      fb.usersCollection
-        .doc(id)
-        .delete()
+    addUserPermissions () {
+      fb.userpermissionsCollection
+        .doc(this.modifiedUserpermissions.id)
+        .set({
+          read: this.modifiedUserpermissions.read,
+          write: this.modifiedUserpermissions.write
+        })
+        .then(doc => {
+          this.modifiedUserpermissions.id = ''
+          this.modifiedUserpermissions.name = ''
+          this.modifiedUserpermissions.read = ''
+          this.modifiedUserpermissions.write = ''
+          this.showEditPermissionsSection = false
+          this.isEdit = false
+        })
         .catch(err => {
           console.log(err)
         })
     },
-    viewAddSection () {
-      this.showAddsection = true
+    modifyUserpermissions (user) {
+      this.modifiedUserpermissions.id = user.id
+      this.modifiedUserpermissions.name = user.name
+      this.showEditPermissionsSection = true
+      if (user.userpermission) {
+        this.isEdit = true
+        if (user.userpermission.read) {
+          this.modifiedUserpermissions.read = user.userpermission.read
+        } else {
+          this.modifiedUserpermissions.read = false
+        }
+        if (user.userpermission.read) {
+          this.modifiedUserpermissions.write = user.userpermission.write
+        } else {
+          this.modifiedUserpermissions.write = false
+        }
+      } else {
+        this.isEdit = false
+        this.modifiedUserpermissions.read = false
+        this.modifiedUserpermissions.write = false
+      }
     },
     closePostModal () {
-      this.showAddsection = false
+      this.showEditPermissionsSection = false
     }
   }
 }

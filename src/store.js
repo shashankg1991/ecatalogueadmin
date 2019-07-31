@@ -8,7 +8,7 @@ Vue.use(Vuex)
 fb.auth.onAuthStateChanged(user => {
   if (user) {
     store.commit('setCurrentUser', user)
-    fb.usersCollection.orderBy('u_id').onSnapshot(querySnapshot => {
+    fb.usersCollection.onSnapshot(querySnapshot => {
       let usersArray = []
       querySnapshot.forEach(doc => {
         let user = doc.data()
@@ -16,9 +16,29 @@ fb.auth.onAuthStateChanged(user => {
         usersArray.push(user)
       })
       store.commit('setUsers', usersArray)
+      fb.userpermissionsCollection.onSnapshot(querySnapshot => {
+        let userpermissionsArray = []
+        querySnapshot.forEach(doc => {
+          let userpermission = doc.data()
+          userpermission.id = doc.id
+          usersArray.filter(u => u.id === userpermission.id).forEach(fu => fu.userpermission = userpermission)
+          userpermissionsArray.push(userpermission)
+        })
+        store.commit('setUserpermissions', userpermissionsArray)
+      })
+    });
+
+    fb.userpermissionsCollection.onSnapshot(querySnapshot => {
+      let userpermissionsArray = []
+      querySnapshot.forEach(doc => {
+        let userpermission = doc.data()
+        userpermission.id = doc.id
+        userpermissionsArray.push(userpermission)
+      })
+      store.commit('setUserpermissions', userpermissionsArray)
     })
 
-    fb.itemsCollection.orderBy('u_id').onSnapshot(querySnapshot => {
+    fb.itemsCollection.onSnapshot(querySnapshot => {
       let itemsArray = []
       querySnapshot.forEach(doc => {
         let item = doc.data()
@@ -28,7 +48,17 @@ fb.auth.onAuthStateChanged(user => {
       store.commit('setItems', itemsArray)
     })
 
-    fb.categoriesCollection.orderBy('u_id').onSnapshot(querySnapshot => {
+    fb.userpermissionsCollection.onSnapshot(querySnapshot => {
+      let userpermissionsArray = []
+      querySnapshot.forEach(doc => {
+        let userpermission = doc.data()
+        userpermission.id = doc.id
+        userpermissionsArray.push(userpermission)
+      })
+      store.commit('setUserpermissions', userpermissionsArray)
+    })
+
+    fb.categoriesCollection.onSnapshot(querySnapshot => {
       let categoriesArray = []
       querySnapshot.forEach(doc => {
         let category = doc.data()
@@ -45,46 +75,62 @@ export const store = new Vuex.Store({
     currentUser: null,
     users: [],
     items: [],
-    categories: []
+    categories: [],
+    userpermissions: [],
   },
   actions: {
-    clearData ({ commit }) {
+    clearData({
+      commit
+    }) {
       commit('setCurrentUser', null)
       commit('setUsers', null)
       commit('setItems', null)
       commit('setCategories', null)
+      commit('setUserpermissions', null)
     }
   },
   mutations: {
-    setCurrentUser (state, val) {
+    setCurrentUser(state, val) {
       state.currentUser = val
     },
-    setUsers (state, val) {
+    setUsers(state, val) {
       if (val) {
         state.users = val
       } else {
         state.users = []
       }
     },
-    setItems (state, val) {
+    setItems(state, val) {
       if (val) {
         state.items = val
       } else {
         state.items = []
       }
     },
-    setCategories (state, val) {
+    setCategories(state, val) {
       if (val) {
         state.categories = val
       } else {
         state.categories = []
       }
     },
-    clearData (state) {
+    setUserpermissions(state, val) {
+      if (val) {
+        state.userpermissions = val
+        val.forEach(userpermission => {
+          state.users.filter(u => u.id === userpermission.id).forEach(fu => fu.userpermission = userpermission)
+        })
+        state.users = state.users
+      } else {
+        state.userpermissions = []
+      }
+    },
+    clearData(state) {
       state.currentUser = null
       state.users = []
       state.items = []
       state.categories = []
+      state.userpermissions = []
     }
   }
 })

@@ -3,6 +3,11 @@
 
 // colors
 $primary: #17a2b8;
+$light: #F5F8FA;
+$medium: #657786;
+$dark: #34495E;
+$white: #fff;
+
 
 // globals
 section {
@@ -13,6 +18,14 @@ section {
   @media screen and (max-width: 742px) {
     display: block;
   }
+}
+
+.marginTop {
+  margin-top: 10px;
+}
+
+.marginBottom {
+  margin-bottom: 10px;
 }
 
 .col1,

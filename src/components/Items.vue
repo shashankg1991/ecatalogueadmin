@@ -1,7 +1,7 @@
 <template>
-  <div id="dashboard">
-    <b-container v-if="!showAddsection">
-      <b-row>
+  <div class="marginTop">
+    <b-container class="marginTop" v-if="!showAddsection">
+      <b-row class="marginTop">
         <b-col cols="6" align-v="end">
           <b-form-input type="text" v-model="searchterm" placeholder="Search items"/>
         </b-col>
@@ -21,6 +21,7 @@
         hover
         :items="filteredItems"
         :fields="fields"
+        class="marginTop"
       >
         <template slot="image" slot-scope="data">
           <img :src="data.item.imageurl" height="100">
@@ -52,15 +53,14 @@
             </b-form-group>
 
             <b-form-group label="Category:" label-for="category">
-              <b-form-input
+              <b-form-select
                 id="category"
-                v-model="modifiedItem.category"
-                type="text"
                 required
                 placeholder="Category"
-              ></b-form-input>
+                v-model="modifiedItem.category"
+                :options="categoryNames"
+              ></b-form-select>
             </b-form-group>
-
             <b-form-group label="Name:" label-for="name">
               <b-form-input
                 id="name"
@@ -90,16 +90,21 @@
               ></b-form-input>
             </b-form-group>
 
-            <b-form-group label="Image:" label-for="imageurl">
+            <b-form-group label="Image:" class="marginTop" label-for="imageurl">
               <b-form-input
                 id="imageurl"
                 v-model="modifiedItem.imageurl"
                 type="text"
                 placeholder="Image URL"
               ></b-form-input>
-              <b-button center variant="secondary" @click="onPickFile">Upload Image</b-button>
+              <b-img class="marginTop" :src="imageUrl"></b-img>
+              <b-button
+                center
+                variant="secondary"
+                class="marginTop"
+                @click="onPickFile"
+              >Upload Image</b-button>
               <input type="file" accept="image/*" @change="onFilePicked" hidden ref="fileInput">
-              <b-img :src="imageUrl"></b-img>
             </b-form-group>
             <b-button center variant="primary" @click="addItem">Save</b-button>
           </b-form>
@@ -116,7 +121,7 @@ const fb = require('../firebaseConfig.js')
 export default {
   data () {
     return {
-      fields: ['image', 'code', 'name', 'price', 'description', 'actions'],
+      fields: ['image', 'code', 'name', 'price', 'category', 'description', 'actions'],
       imageUrl: '',
       imageFile: '',
       image: '',
@@ -136,7 +141,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['currentUser', 'items']),
+    ...mapState(['currentUser', 'items', 'categories']),
     filteredItems: function () {
       return this.items.filter(item => {
         return (
@@ -153,6 +158,11 @@ export default {
             .trim()
             .match(this.searchterm.toLowerCase().trim())
         )
+      })
+    },
+    categoryNames: function () {
+      return this.categories.map(category => {
+        return category.name
       })
     }
   },
@@ -227,7 +237,14 @@ export default {
 
     editItem (item) {
       this.isEdit = true
-      this.modifiedItem = item
+      this.modifiedItem.id = item.id
+      this.modifiedItem.code = item.code
+      this.modifiedItem.name = item.name
+      this.modifiedItem.description = item.description
+      this.modifiedItem.category = item.category
+      this.modifiedItem.u_id = item.u_id
+      this.modifiedItem.imageurl = item.imageurl
+      this.modifiedItem.price = item.price
       this.showAddsection = true
     },
     deleteItem (id) {
@@ -242,6 +259,14 @@ export default {
       this.showAddsection = true
     },
     closePostModal () {
+      this.modifiedItem.id = ''
+      this.modifiedItem.code = ''
+      this.modifiedItem.name = ''
+      this.modifiedItem.description = ''
+      this.modifiedItem.category = ''
+      this.modifiedItem.u_id = ''
+      this.modifiedItem.imageurl = ''
+      this.modifiedItem.price = ''
       this.showAddsection = false
     },
     onPickFile () {
