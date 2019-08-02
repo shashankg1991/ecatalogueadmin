@@ -82,7 +82,7 @@ export default {
       searchterm: '',
       modifiedBrand: {
         name: '',
-        imageurl: '',
+        imageurl: ''
       },
       showAddsection: false,
       isEdit: false

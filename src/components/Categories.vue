@@ -50,79 +50,79 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
-const fb = require("../firebaseConfig.js");
+import { mapState } from 'vuex'
+const fb = require('../firebaseConfig.js')
 export default {
-  data() {
+  data () {
     return {
-      fields: ["name", "actions"],
-      searchterm: "",
+      fields: ['name', 'actions'],
+      searchterm: '',
       modifiedCategory: {
-        name: "",
+        name: ''
       },
       showAddsection: false,
       isEdit: false
-    };
+    }
   },
   computed: {
-    ...mapState(["currentUser", "categories"]),
-    filteredCategories: function() {
+    ...mapState(['currentUser', 'categories']),
+    filteredCategories: function () {
       return this.categories.filter(category => {
         return category.name
           .toLowerCase()
           .trim()
-          .match(this.searchterm.toLowerCase().trim());
-      });
+          .match(this.searchterm.toLowerCase().trim())
+      })
     }
   },
   methods: {
-    addCategory() {
+    addCategory () {
       if (this.isEdit) {
         fb.categoriesCollection
           .doc(this.modifiedCategory.id)
           .set(this.modifiedCategory)
           .then(doc => {
-            this.modifiedCategory.name = "";
-            this.showAddsection = false;
-            this.isEdit = false;
+            this.modifiedCategory.name = ''
+            this.showAddsection = false
+            this.isEdit = false
           })
           .catch(err => {
-            console.log(err);
-          });
+            console.log(err)
+          })
       } else {
         fb.categoriesCollection
           .add({
             name: this.modifiedCategory.name
           })
           .then(doc => {
-            this.modifiedCategory.name = "";
-            this.showAddsection = false;
-            this.isEdit = false;
+            this.modifiedCategory.name = ''
+            this.showAddsection = false
+            this.isEdit = false
           })
           .catch(err => {
-            console.log(err);
-          });
+            console.log(err)
+          })
       }
     },
-    editCategory(category) {
-      this.isEdit = true;
-      this.modifiedCategory = category;
-      this.showAddsection = true;
+    editCategory (category) {
+      this.isEdit = true
+      this.modifiedCategory = category
+      this.showAddsection = true
     },
-    deleteCategory(id) {
+    deleteCategory (id) {
       fb.categoriesCollection
         .doc(id)
         .delete()
         .catch(err => {
-          console.log(err);
-        });
+          console.log(err)
+        })
     },
-    viewAddSection() {
-      this.showAddsection = true;
+    viewAddSection () {
+      this.showAddsection = true
     },
-    closePostModal() {
-      this.showAddsection = false;
+    closePostModal () {
+      this.showAddsection = false
     }
   }
-};
+}
 </script>

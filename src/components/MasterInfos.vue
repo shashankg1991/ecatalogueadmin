@@ -10,7 +10,7 @@
         </b-col>
       </b-row>
       <b-table
-        v-if="masterInfos.length"
+        v-if="masterInfos"
         borderless
         outlined
         hover
@@ -118,116 +118,116 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
-import { uuid } from "vue-uuid";
-const fb = require("../firebaseConfig.js");
+import { mapState } from 'vuex'
+import { uuid } from 'vue-uuid'
+const fb = require('../firebaseConfig.js')
 export default {
-  data() {
+  data () {
     return {
       fields: [
-        { key: "applicationname", label: "Application" },
-        { key: "logoimageurl", label: "Logo Image" },
-        { key: "mainbannerurl", label: "Main Image" },
-        { key: "promotiontext", label: "Offer" },
-        { key: "showbrandspage", label: "Show Brands" },
-        "actions"
+        { key: 'applicationname', label: 'Application' },
+        { key: 'logoimageurl', label: 'Logo Image' },
+        { key: 'mainbannerurl', label: 'Main Image' },
+        { key: 'promotiontext', label: 'Offer' },
+        { key: 'showbrandspage', label: 'Show Brands' },
+        'actions'
       ],
       showBrandsOptions: [true, false],
-      logoImageUrl: "",
-      logoImageFile: "",
-      logoImage: "",
-      mainBannerImageUrl: "",
-      mainBannerImageFile: "",
-      mainBannerImage: "",
-      searchterm: "",
+      logoImageUrl: '',
+      logoImageFile: '',
+      logoImage: '',
+      mainBannerImageUrl: '',
+      mainBannerImageFile: '',
+      mainBannerImage: '',
+      searchterm: '',
       modifiedMasterInfo: {
-        applicationname: "",
-        promotiontext: "",
-        logoimageurl: "",
-        mainbannerurl: "",
-        showbrandspage: "",
-        u_id: ""
+        applicationname: '',
+        promotiontext: '',
+        logoimageurl: '',
+        mainbannerurl: '',
+        showbrandspage: '',
+        u_id: ''
       },
       showAddsection: false,
       isEdit: false
-    };
+    }
   },
   computed: {
-    ...mapState(["currentUser", "masterInfos"])
+    ...mapState(['currentUser', 'masterInfos'])
   },
   methods: {
-    addMasterInfo() {
+    addMasterInfo () {
       if (this.logoImageUrl && this.mainBannerImageUrl) {
         fb.storage
-          .ref("master/" + this.logoImageFile.name)
+          .ref('master/' + this.logoImageFile.name)
           .put(this.logoImageFile)
           .then(filedata => {
             filedata.ref.getDownloadURL().then(url => {
-              this.modifiedMasterInfo.logoimageurl = url;
-              this.logoImageUrl = "";
-              this.logoImageFile = "";
-              this.logoImage = "";
+              this.modifiedMasterInfo.logoimageurl = url
+              this.logoImageUrl = ''
+              this.logoImageFile = ''
+              this.logoImage = ''
               fb.storage
-                .ref("master/" + this.mainBannerImageFile.name)
+                .ref('master/' + this.mainBannerImageFile.name)
                 .put(this.mainBannerImageFile)
                 .then(filedata => {
                   filedata.ref.getDownloadURL().then(url => {
-                    this.modifiedMasterInfo.mainbannerurl = url;
-                    this.mainBannerImageUrl = "";
-                    this.mainBannerImageFile = "";
-                    this.mainBannerImage = "";
-                    this.saveItem();
-                  });
-                });
-            });
-          });
+                    this.modifiedMasterInfo.mainbannerurl = url
+                    this.mainBannerImageUrl = ''
+                    this.mainBannerImageFile = ''
+                    this.mainBannerImage = ''
+                    this.saveItem()
+                  })
+                })
+            })
+          })
       } else if (this.logoImageUrl) {
         fb.storage
-          .ref("master/" + this.logoImageFile.name)
+          .ref('master/' + this.logoImageFile.name)
           .put(this.logoImageFile)
           .then(filedata => {
             filedata.ref.getDownloadURL().then(url => {
-              this.modifiedMasterInfo.logoimageurl = url;
-              this.logoImageUrl = "";
-              this.logoImageFile = "";
-              this.logoImage = "";
-              this.saveItem();
-            });
-          });
+              this.modifiedMasterInfo.logoimageurl = url
+              this.logoImageUrl = ''
+              this.logoImageFile = ''
+              this.logoImage = ''
+              this.saveItem()
+            })
+          })
       } else if (this.mainBannerImageUrl) {
         fb.storage
-          .ref("master/" + this.mainBannerImageFile.name)
+          .ref('master/' + this.mainBannerImageFile.name)
           .put(this.mainBannerImageFile)
           .then(filedata => {
             filedata.ref.getDownloadURL().then(url => {
-              this.modifiedMasterInfo.mainbannerurl = url;
-              this.mainBannerImageUrl = "";
-              this.mainBannerImageFile = "";
-              this.mainBannerImage = "";
-              this.saveItem();
-            });
-          });
+              this.modifiedMasterInfo.mainbannerurl = url
+              this.mainBannerImageUrl = ''
+              this.mainBannerImageFile = ''
+              this.mainBannerImage = ''
+              this.saveItem()
+            })
+          })
       } else {
-        this.saveItem();
+        this.saveItem()
       }
     },
-    saveItem() {
+    saveItem () {
       if (this.isEdit) {
         fb.masterInfosCollection
           .doc(this.modifiedMasterInfo.id)
           .set(this.modifiedMasterInfo)
           .then(doc => {
-            this.modifiedMasterInfo.applicationname = "";
-            this.modifiedMasterInfo.promotiontext = "";
-            this.modifiedMasterInfo.logoimageurl = "";
-            (this.modifiedMasterInfo.mainbannerurl = ""),
-              (this.modifiedMasterInfo.showbrandspage = "");
-            this.showAddsection = false;
-            this.isEdit = false;
+            this.modifiedMasterInfo.applicationname = ''
+            this.modifiedMasterInfo.promotiontext = ''
+            this.modifiedMasterInfo.logoimageurl = ''
+            this.modifiedMasterInfo.mainbannerurl = ''
+            this.modifiedMasterInfo.showbrandspage = ''
+            this.showAddsection = false
+            this.isEdit = false
           })
           .catch(err => {
-            console.log(err);
-          });
+            console.log(err)
+          })
       } else {
         fb.masterInfosCollection
           .add({
@@ -239,68 +239,68 @@ export default {
             showbrandspage: this.modifiedMasterInfo.showbrandspage
           })
           .then(doc => {
-            this.modifiedMasterInfo.u_id = "";
-            this.modifiedMasterInfo.applicationname = "";
-            this.modifiedMasterInfo.promotiontext = "";
-            this.modifiedMasterInfo.logoimageurl = "";
-            (this.modifiedMasterInfo.mainbannerurl = ""),
-              (this.modifiedMasterInfo.showbrandspage = "");
-            this.showAddsection = false;
-            this.isEdit = false;
+            this.modifiedMasterInfo.u_id = ''
+            this.modifiedMasterInfo.applicationname = ''
+            this.modifiedMasterInfo.promotiontext = ''
+            this.modifiedMasterInfo.logoimageurl = ''
+            this.modifiedMasterInfo.mainbannerurl = ''
+            this.modifiedMasterInfo.showbrandspage = ''
+            this.showAddsection = false
+            this.isEdit = false
           })
           .catch(err => {
-            console.log(err);
-          });
+            console.log(err)
+          })
       }
     },
-    editMasterInfo(masterInfo) {
-      this.isEdit = true;
-      this.modifiedMasterInfo = masterInfo;
-      this.showAddsection = true;
+    editMasterInfo (masterInfo) {
+      this.isEdit = true
+      this.modifiedMasterInfo = masterInfo
+      this.showAddsection = true
     },
-    deleteMasterInfo(id) {
+    deleteMasterInfo (id) {
       fb.masterInfosCollection
         .doc(id)
         .delete()
         .catch(err => {
-          console.log(err);
-        });
+          console.log(err)
+        })
     },
-    viewAddSection() {
-      this.showAddsection = true;
+    viewAddSection () {
+      this.showAddsection = true
     },
-    closePostModal() {
+    closePostModal () {
       this.modifiedMasterInfo = {
-        applicationname: "",
-        promotiontext: "",
-        logoimageurl: "",
-        mainbannerurl: "",
-        showbrandspage: ""
-      };
-      this.showAddsection = false;
+        applicationname: '',
+        promotiontext: '',
+        logoimageurl: '',
+        mainbannerurl: '',
+        showbrandspage: ''
+      }
+      this.showAddsection = false
     },
-    onPickLogoFile() {
-      this.$refs.logoFileInput.click();
+    onPickLogoFile () {
+      this.$refs.logoFileInput.click()
     },
-    onLogoFilePicked(event) {
-      const fileReader = new FileReader();
-      fileReader.addEventListener("load", () => {
-        this.logoImageUrl = fileReader.result;
-        this.logoImageFile = event.target.files[0];
-      });
-      this.logoImage = fileReader.readAsDataURL(event.target.files[0]);
+    onLogoFilePicked (event) {
+      const fileReader = new FileReader()
+      fileReader.addEventListener('load', () => {
+        this.logoImageUrl = fileReader.result
+        this.logoImageFile = event.target.files[0]
+      })
+      this.logoImage = fileReader.readAsDataURL(event.target.files[0])
     },
-    onPickMainBannerFile() {
-      this.$refs.mainBannerFileInput.click();
+    onPickMainBannerFile () {
+      this.$refs.mainBannerFileInput.click()
     },
-    onMainBannerFilePicked(event) {
-      const fileReader = new FileReader();
-      fileReader.addEventListener("load", () => {
-        this.mainBannerImageUrl = fileReader.result;
-        this.mainBannerImageFile = event.target.files[0];
-      });
-      this.mainBannerImage = fileReader.readAsDataURL(event.target.files[0]);
+    onMainBannerFilePicked (event) {
+      const fileReader = new FileReader()
+      fileReader.addEventListener('load', () => {
+        this.mainBannerImageUrl = fileReader.result
+        this.mainBannerImageFile = event.target.files[0]
+      })
+      this.mainBannerImage = fileReader.readAsDataURL(event.target.files[0])
     }
   }
-};
+}
 </script>
