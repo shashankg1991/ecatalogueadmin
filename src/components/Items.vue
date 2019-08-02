@@ -2,13 +2,31 @@
   <div class="marginTop">
     <b-container class="marginTop" v-if="!showAddsection">
       <b-row class="marginTop">
-        <b-col cols="6" align-v="end">
-          <b-form-input type="text" v-model="searchterm" placeholder="Search items"/>
+        <b-col cols="8" align-v="end">
+          <b-row>
+            <b-col cols="4">
+              <b-form-input type="text" v-model="searchterm" placeholder="Search items"/>
+            </b-col>
+            <b-col cols="4">
+              <b-form-input
+                type="text"
+                v-model="searchcategoryterm"
+                placeholder="Search items by category"
+              />
+            </b-col>
+            <b-col cols="4">
+              <b-form-input
+                type="text"
+                v-model="searchbrandterm"
+                placeholder="Search items by brand"
+              />
+            </b-col>
+          </b-row>
         </b-col>
-        <b-col cols="3">
+        <b-col cols="2">
           <b-button variant="primary" @click="viewAddSection">Add new item</b-button>
         </b-col>
-        <b-col cols="3">
+        <b-col cols="2">
           <b-button center variant="secondary" @click="onPickUploadFile">Upload Items</b-button>
           <input type="file" hidden @change="onImportFilePicked" ref="fileUpload">
         </b-col>
@@ -23,12 +41,15 @@
         :fields="fields"
         class="marginTop"
       >
+      <template slot="price" slot-scope="data">
+          {{data.item.price|currency('₹')}}
+        </template>
         <template slot="image" slot-scope="data">
-          <img :src="data.item.imageurl" height="100">
+          <img :src="data.item.imageurl" width="50">
         </template>
         <template slot="actions" slot-scope="data">
           <b-button variant="outline-primary" @click="editItem(data.item)">Edit</b-button>
-          <b-button variant="danger" @click="deleteItem(data.item.id)">Delete</b-button>
+          <b-button class="marginTop" variant="danger" @click="deleteItem(data.item.id)">Delete</b-button>
         </template>
       </b-table>
 
@@ -51,7 +72,15 @@
                 placeholder="Code"
               ></b-form-input>
             </b-form-group>
-
+            <b-form-group label="Brand:" label-for="brand">
+              <b-form-select
+                id="brand"
+                required
+                placeholder="Brand"
+                v-model="modifiedItem.brand"
+                :options="brandNames"
+              ></b-form-select>
+            </b-form-group>
             <b-form-group label="Category:" label-for="category">
               <b-form-select
                 id="category"
@@ -115,243 +144,240 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
-import { uuid } from 'vue-uuid'
-const fb = require('../firebaseConfig.js')
+import { mapState } from "vuex";
+const fb = require("../firebaseConfig.js");
 export default {
-  data () {
+  data() {
     return {
-      fields: ['image', 'code', 'name', 'price', 'category', 'description', 'actions'],
-      imageUrl: '',
-      imageFile: '',
-      image: '',
-      searchterm: '',
+      fields: [
+        "image",
+        "code",
+        "name",
+        "price",
+        "category",
+        "brand",
+        "description",
+        "actions"
+      ],
+      imageUrl: "",
+      imageFile: "",
+      image: "",
+      searchterm: "",
+      searchcategoryterm: "",
+      searchbrandterm: "",
       modifiedItem: {
-        id: '',
-        code: '',
-        name: '',
-        description: '',
-        category: '',
-        u_id: '',
-        imageurl: '',
-        price: ''
+        id: "",
+        code: "",
+        name: "",
+        description: "",
+        category: "",
+        brand: "",
+        imageurl: "",
+        price: ""
       },
       showAddsection: false,
       isEdit: false
-    }
+    };
   },
   computed: {
-    ...mapState(['currentUser', 'items', 'categories']),
-    filteredItems: function () {
+    ...mapState(["currentUser", "items", "categories", "brands"]),
+    filteredItems: function() {
       return this.items.filter(item => {
         return (
-          item.code
+          (item.code
             .toLowerCase()
             .trim()
             .match(this.searchterm.toLowerCase().trim()) ||
-          item.name
-            .toLowerCase()
-            .trim()
-            .match(this.searchterm.toLowerCase().trim()) ||
+            item.name
+              .toLowerCase()
+              .trim()
+              .match(this.searchterm.toLowerCase().trim())) &&
           item.category
             .toLowerCase()
             .trim()
-            .match(this.searchterm.toLowerCase().trim())
-        )
-      })
+            .match(this.searchcategoryterm.toLowerCase().trim()) &&
+          item.brand
+            .toLowerCase()
+            .trim()
+            .match(this.searchbrandterm.toLowerCase().trim())
+        );
+      });
     },
-    categoryNames: function () {
+    categoryNames: function() {
       return this.categories.map(category => {
-        return category.name
-      })
+        return category.name;
+      });
+    },
+    brandNames: function() {
+      return this.brands.map(brand => {
+        return brand.name;
+      });
     }
   },
   methods: {
-    addItem () {
+    addItem() {
       if (this.imageUrl) {
         fb.storage
-          .ref('items/' + this.imageFile.name)
+          .ref("items/" + this.imageFile.name)
           .put(this.imageFile)
           .then(filedata => {
             filedata.ref.getDownloadURL().then(url => {
-              this.modifiedItem.imageurl = url
-              this.imageUrl = ''
-              this.imageFile = ''
-              this.image = ''
-              this.saveItem()
-            })
-          })
+              this.modifiedItem.imageurl = url;
+              this.imageUrl = "";
+              this.imageFile = "";
+              this.image = "";
+              this.saveItem();
+            });
+          });
       } else {
-        this.saveItem()
+        this.saveItem();
       }
     },
 
-    saveItem () {
+    saveItem() {
       if (this.isEdit) {
         fb.itemsCollection
           .doc(this.modifiedItem.id)
           .set(this.modifiedItem)
           .then(doc => {
-            this.modifiedItem.id = ''
-            this.modifiedItem.code = ''
-            this.modifiedItem.name = ''
-            this.modifiedItem.description = ''
-            this.modifiedItem.category = ''
-            this.modifiedItem.u_id = ''
-            this.modifiedItem.imageurl = ''
-            this.modifiedItem.price = ''
-            this.showAddsection = false
-            this.isEdit = false
+            this.modifiedItem.id = "";
+            this.modifiedItem.code = "";
+            this.modifiedItem.name = "";
+            this.modifiedItem.description = "";
+            this.modifiedItem.category = "";
+            this.modifiedItem.brand = "";
+            this.modifiedItem.imageurl = "";
+            this.modifiedItem.price = "";
+            this.showAddsection = false;
+            this.isEdit = false;
           })
           .catch(err => {
-            console.log(err)
-          })
+            console.log(err);
+          });
       } else {
         fb.itemsCollection
           .add({
-            u_id: uuid.v1(),
             code: this.modifiedItem.code,
             name: this.modifiedItem.name,
             description: this.modifiedItem.description,
             category: this.modifiedItem.category,
+            brand: this.modifiedItem.brand,
             imageurl: this.modifiedItem.imageurl,
             price: this.modifiedItem.price
           })
           .then(doc => {
-            this.modifiedItem.id = ''
-            this.modifiedItem.code = ''
-            this.modifiedItem.name = ''
-            this.modifiedItem.description = ''
-            this.modifiedItem.category = ''
-            this.modifiedItem.u_id = ''
-            this.modifiedItem.imageurl = ''
-            this.modifiedItem.price = ''
-            this.showAddsection = false
-            this.isEdit = false
+            this.modifiedItem.id = "";
+            this.modifiedItem.code = "";
+            this.modifiedItem.name = "";
+            this.modifiedItem.description = "";
+            this.modifiedItem.category = "";
+            this.modifiedItem.brand = "";
+            this.modifiedItem.imageurl = "";
+            this.modifiedItem.price = "";
+            this.showAddsection = false;
+            this.isEdit = false;
           })
           .catch(err => {
-            console.log(err)
-          })
+            console.log(err);
+          });
       }
     },
 
-    editItem (item) {
-      this.isEdit = true
-      this.modifiedItem.id = item.id
-      this.modifiedItem.code = item.code
-      this.modifiedItem.name = item.name
-      this.modifiedItem.description = item.description
-      this.modifiedItem.category = item.category
-      this.modifiedItem.u_id = item.u_id
-      this.modifiedItem.imageurl = item.imageurl
-      this.modifiedItem.price = item.price
-      this.showAddsection = true
+    editItem(item) {
+      this.isEdit = true;
+      this.modifiedItem.id = item.id;
+      this.modifiedItem.code = item.code;
+      this.modifiedItem.name = item.name;
+      this.modifiedItem.description = item.description;
+      this.modifiedItem.category = item.category;
+      this.modifiedItem.imageurl = item.imageurl;
+      this.modifiedItem.price = item.price;
+      this.showAddsection = true;
     },
-    deleteItem (id) {
+    deleteItem(id) {
       fb.itemsCollection
         .doc(id)
         .delete()
         .catch(err => {
-          console.log(err)
-        })
+          console.log(err);
+        });
     },
-    viewAddSection () {
-      this.showAddsection = true
+    viewAddSection() {
+      this.showAddsection = true;
     },
-    closePostModal () {
-      this.modifiedItem.id = ''
-      this.modifiedItem.code = ''
-      this.modifiedItem.name = ''
-      this.modifiedItem.description = ''
-      this.modifiedItem.category = ''
-      this.modifiedItem.u_id = ''
-      this.modifiedItem.imageurl = ''
-      this.modifiedItem.price = ''
-      this.showAddsection = false
+    closePostModal() {
+      this.modifiedItem.id = "";
+      this.modifiedItem.code = "";
+      this.modifiedItem.name = "";
+      this.modifiedItem.description = "";
+      this.modifiedItem.category = "";
+      this.modifiedItem.imageurl = "";
+      this.modifiedItem.price = "";
+      this.showAddsection = false;
     },
-    onPickFile () {
-      this.$refs.fileInput.click()
+    onPickFile() {
+      this.$refs.fileInput.click();
     },
-    onFilePicked (event) {
-      const fileReader = new FileReader()
-      fileReader.addEventListener('load', () => {
-        this.imageUrl = fileReader.result
-        this.imageFile = event.target.files[0]
-      })
-      this.image = fileReader.readAsDataURL(event.target.files[0])
+    onFilePicked(event) {
+      const fileReader = new FileReader();
+      fileReader.addEventListener("load", () => {
+        this.imageUrl = fileReader.result;
+        this.imageFile = event.target.files[0];
+      });
+      this.image = fileReader.readAsDataURL(event.target.files[0]);
     },
-    onPickUploadFile () {
-      this.$refs.fileUpload.click()
+    onPickUploadFile() {
+      this.$refs.fileUpload.click();
     },
-    onImportFilePicked (event) {
-      var reader = new FileReader()
-      reader.readAsText(event.target.files[0])
-      var fileinput
+    onImportFilePicked(event) {
+      var reader = new FileReader();
+      reader.readAsText(event.target.files[0]);
+      var fileinput;
       reader.onload = e => {
-        fileinput = e.target.result
-        var lines = fileinput.split('\n')
+        fileinput = e.target.result;
+        var lines = fileinput.split("\n");
         // Need to create a map as, by the time response comes from firebase, the data object gets modified by next iteration
-        var keyDataMap = {}
+        var keyDataMap = {};
         // Line 0 is header line
         for (var lineNumber = 1; lineNumber < lines.length; lineNumber++) {
-          var data = lines[lineNumber].split(',')
-          console.error('lineNumber' + lines[lineNumber].split(','))
-          if (data[0] !== '') {
-            keyDataMap[data[0]] = data
-            fb.itemsCollection
-              .where('code', '==', data[0])
-              .get()
-              .then(querySnapshot => {
-                if (querySnapshot.docs.length > 0) {
-                  console.error(
-                    'found' + keyDataMap[querySnapshot.docs[0].data().code]
-                  )
-                  var existingDoc = querySnapshot.docs[0].data()
-                  existingDoc.name =
-                    keyDataMap[querySnapshot.docs[0].data().code][1]
-                  existingDoc.description =
-                    keyDataMap[querySnapshot.docs[0].data().code][2]
-                  existingDoc.category =
-                    keyDataMap[querySnapshot.docs[0].data().code][3]
-                  existingDoc.price =
-                    keyDataMap[querySnapshot.docs[0].data().code][4]
-                  fb.itemsCollection
-                    .doc(querySnapshot.docs[0].id)
-                    .set(existingDoc)
-                } else {
-                  console.error('not found' + data)
-                  fb.itemsCollection
-                    .add({
-                      u_id: uuid.v1(),
-                      code: data[0],
-                      name: data[1],
-                      description: data[2],
-                      category: data[3],
-                      price: data[4]
-                    })
-                    .catch(err => {
-                      console.log(err)
-                    })
-                }
-              })
-          } else {
-            console.error('blank' + data)
-            fb.itemsCollection
-              .add({
-                u_id: uuid.v1(),
-                code: data[1],
-                name: data[2],
-                description: data[3],
-                category: data[4],
-                price: data[5]
-              })
-              .catch(err => {
-                console.log(err)
-              })
-          }
+          var data = lines[lineNumber].split(",");
+          console.info("Entry : " + lines[lineNumber].split(","));
+          this.importData(data);
         }
+      };
+    },
+
+    importData(data) {
+      if (data[0] !== "" && data.length === 6) {
+        fb.itemsCollection
+          .where("code", "==", data[0])
+          .get()
+          .then(querySnapshot => {
+            if (querySnapshot.docs.length > 0) {
+              var existingDoc = querySnapshot.docs[0].data();
+              existingDoc.name = data[1];
+              existingDoc.description = data[2];
+              existingDoc.category = data[3];
+              existingDoc.brand = data[4];
+              existingDoc.price = data[5];
+              fb.itemsCollection.doc(querySnapshot.docs[0].id).set(existingDoc);
+            } else {
+              fb.itemsCollection
+                .add({
+                  code: data[0],
+                  name: data[1],
+                  description: data[2],
+                  category: data[3],
+                  brand: data[4],
+                  price: data[5]
+                })
+                .catch(err => {
+                  console.log(err);
+                });
+            }
+          });
       }
     }
   }
-}
+};
 </script>

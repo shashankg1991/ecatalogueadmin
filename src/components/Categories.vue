@@ -18,9 +18,6 @@
         :fields="fields"
         class="marginTop"
       >
-        <template slot="image" slot-scope="data">
-          <img :src="data.item.imageurl" height="100">
-        </template>
         <template slot="actions" slot-scope="data">
           <b-button variant="outline-primary" @click="editCategory(data.item)">Edit</b-button>
           <b-button variant="danger" @click="deleteCategory(data.item.id)">Delete</b-button>
@@ -44,23 +41,6 @@
                 placeholder="Name"
               ></b-form-input>
             </b-form-group>
-
-            <b-form-group label="Image:" class="marginTop" label-for="imageurl">
-              <b-form-input
-                id="imageurl"
-                v-model="modifiedCategory.imageurl"
-                type="text"
-                placeholder="Image URL"
-              ></b-form-input>
-              <b-img class="marginTop" :src="imageUrl"></b-img>
-              <b-button
-                center
-                variant="secondary"
-                class="marginTop"
-                @click="onPickFile"
-              >Upload Image</b-button>
-              <input type="file" accept="image/*" @change="onFilePicked" hidden ref="fileInput">
-            </b-form-group>
             <b-button center variant="primary" @click="addCategory">Save</b-button>
           </b-form>
         </div>
@@ -70,119 +50,79 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
-import { uuid } from 'vue-uuid'
-const fb = require('../firebaseConfig.js')
+import { mapState } from "vuex";
+const fb = require("../firebaseConfig.js");
 export default {
-  data () {
+  data() {
     return {
-      fields: ['image', 'name', 'actions'],
-      imageUrl: '',
-      imageFile: '',
-      image: '',
-      searchterm: '',
+      fields: ["name", "actions"],
+      searchterm: "",
       modifiedCategory: {
-        name: '',
-        imageurl: '',
-        u_id: ''
+        name: "",
       },
       showAddsection: false,
       isEdit: false
-    }
+    };
   },
   computed: {
-    ...mapState(['currentUser', 'categories']),
-    filteredCategories: function () {
+    ...mapState(["currentUser", "categories"]),
+    filteredCategories: function() {
       return this.categories.filter(category => {
         return category.name
           .toLowerCase()
           .trim()
-          .match(this.searchterm.toLowerCase().trim())
-      })
+          .match(this.searchterm.toLowerCase().trim());
+      });
     }
   },
   methods: {
-    addCategory () {
-      if (this.imageUrl) {
-        fb.storage
-          .ref('categories/' + this.imageFile.name)
-          .put(this.imageFile)
-          .then(filedata => {
-            filedata.ref.getDownloadURL().then(url => {
-              this.modifiedCategory.imageurl = url
-              this.imageUrl = ''
-              this.imageFile = ''
-              this.image = ''
-              this.saveItem()
-            })
-          })
-      } else {
-        this.saveItem()
-      }
-    },
-    saveItem () {
+    addCategory() {
       if (this.isEdit) {
         fb.categoriesCollection
           .doc(this.modifiedCategory.id)
           .set(this.modifiedCategory)
           .then(doc => {
-            this.modifiedCategory.name = ''
-            this.modifiedCategory.imageurl = ''
-            this.showAddsection = false
-            this.isEdit = false
+            this.modifiedCategory.name = "";
+            this.showAddsection = false;
+            this.isEdit = false;
           })
           .catch(err => {
-            console.log(err)
-          })
+            console.log(err);
+          });
       } else {
         fb.categoriesCollection
           .add({
-            u_id: uuid.v1(),
-            name: this.modifiedCategory.name,
-            imageurl: this.modifiedCategory.imageurl
+            name: this.modifiedCategory.name
           })
           .then(doc => {
-            this.modifiedCategory.u_id = ''
-            this.modifiedCategory.name = ''
-            this.modifiedCategory.imageurl = ''
-            this.showAddsection = false
-            this.isEdit = false
+            this.modifiedCategory.name = "";
+            this.showAddsection = false;
+            this.isEdit = false;
           })
           .catch(err => {
-            console.log(err)
-          })
+            console.log(err);
+          });
       }
     },
-    editCategory (category) {
-      this.isEdit = true
-      this.modifiedCategory = category
-      this.showAddsection = true
+    editCategory(category) {
+      this.isEdit = true;
+      this.modifiedCategory = category;
+      this.showAddsection = true;
     },
-    deleteCategory (id) {
+    deleteCategory(id) {
       fb.categoriesCollection
         .doc(id)
         .delete()
         .catch(err => {
-          console.log(err)
-        })
+          console.log(err);
+        });
     },
-    viewAddSection () {
-      this.showAddsection = true
+    viewAddSection() {
+      this.showAddsection = true;
     },
-    closePostModal () {
-      this.showAddsection = false
-    },
-    onPickFile () {
-      this.$refs.fileInput.click()
-    },
-    onFilePicked (event) {
-      const fileReader = new FileReader()
-      fileReader.addEventListener('load', () => {
-        this.imageUrl = fileReader.result
-        this.imageFile = event.target.files[0]
-      })
-      this.image = fileReader.readAsDataURL(event.target.files[0])
+    closePostModal() {
+      this.showAddsection = false;
     }
   }
-}
+};
 </script>

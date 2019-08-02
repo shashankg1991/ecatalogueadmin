@@ -26,9 +26,11 @@ const settings = {
 db.settings(settings)
 
 // firebase collections
+const masterInfosCollection = db.collection('master')
 const usersCollection = db.collection('users')
 const itemsCollection = db.collection('items')
 const categoriesCollection = db.collection('categories')
+const brandsCollection = db.collection('brands')
 const userpermissionsCollection = db.collection('userpermissions')
 
 export {
@@ -36,8 +38,10 @@ export {
   auth,
   storage,
   currentUser,
+  masterInfosCollection,
   usersCollection,
   itemsCollection,
   categoriesCollection,
+  brandsCollection,
   userpermissionsCollection
 }

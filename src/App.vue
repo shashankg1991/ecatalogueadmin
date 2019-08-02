@@ -3,9 +3,11 @@
     <b-navbar toggleable="lg" type="dark" variant="info" v-if="currentUser">
       <b-navbar-brand href="/home">eCatalogue Management</b-navbar-brand>
       <b-navbar-nav class="ml-auto">
+        <b-nav-item href="/masters">Master Infos</b-nav-item>
         <b-nav-item href="/users">Users</b-nav-item>
         <b-nav-item href="/items">Items</b-nav-item>
         <b-nav-item href="/categories">Categories</b-nav-item>
+        <b-nav-item href="/brands">Brands</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto" >
         <b-nav-item right @click="signOut">Logout</b-nav-item>

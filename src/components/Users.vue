@@ -41,7 +41,7 @@
         <div class="p-container">
           <a @click="closePostModal" class="close">X</a>
           <b-form class="post">
-            Permissions for {{modifiedUserpermissions.name}}
+            Permissions for {{modifiedUserpermissions.email}}
             <b-form-group label="Read:" label-for="read">
               <b-form-select
                 id="read"
@@ -75,11 +75,11 @@ export default {
   data () {
     return {
       permissionOptions: [true, false],
-      fields: ['name', 'userpermission', 'actions'],
+      fields: ['email', 'userpermission', 'actions'],
       searchterm: '',
       modifiedUserpermissions: {
         id: '',
-        name: '',
+        email: '',
         read: '',
         write: ''
       },
@@ -91,7 +91,7 @@ export default {
     ...mapState(['currentUser', 'users', 'userpermissions']),
     filteredUsers: function () {
       return this.users.filter(user => {
-        return user.name
+        return user.email
           .toLowerCase()
           .trim()
           .match(this.searchterm.toLowerCase().trim())
@@ -108,7 +108,7 @@ export default {
         })
         .then(doc => {
           this.modifiedUserpermissions.id = ''
-          this.modifiedUserpermissions.name = ''
+          this.modifiedUserpermissions.email = ''
           this.modifiedUserpermissions.read = ''
           this.modifiedUserpermissions.write = ''
           this.showEditPermissionsSection = false
@@ -120,7 +120,7 @@ export default {
     },
     modifyUserpermissions (user) {
       this.modifiedUserpermissions.id = user.id
-      this.modifiedUserpermissions.name = user.name
+      this.modifiedUserpermissions.name = user.email
       this.showEditPermissionsSection = true
       if (user.userpermission) {
         this.isEdit = true

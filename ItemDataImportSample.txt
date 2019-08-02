@@ -1,3 +1,0 @@
-code,name,description,category,price
-P1,s1,s2,s3,50
-,ns1,ns2,ns3,100
