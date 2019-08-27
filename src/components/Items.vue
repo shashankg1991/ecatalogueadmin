@@ -236,6 +236,9 @@ export default {
 
     saveItem () {
       if (this.isEdit) {
+        if(!this.modifiedItem.imageurl){
+          this.modifiedItem.imageurl=''
+        }
         fb.itemsCollection
           .doc(this.modifiedItem.id)
           .set(this.modifiedItem)
@@ -291,7 +294,8 @@ export default {
       this.modifiedItem.description = item.description
       this.modifiedItem.category = item.category
       this.modifiedItem.imageurl = item.imageurl
-      this.modifiedItem.price = item.price
+      this.modifiedItem.price = item.price.trim()
+      this.modifiedItem.brand = item.brand
       this.showAddsection = true
     },
     deleteItem (id) {

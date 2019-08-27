@@ -41,6 +41,15 @@
                 placeholder="Name"
               ></b-form-input>
             </b-form-group>
+            <b-form-group label="Brand:" label-for="brand">
+              <b-form-select
+                id="brand"
+                required
+                placeholder="Brand"
+                v-model="modifiedCategory.brand"
+                :options="brandNames"
+              ></b-form-select>
+            </b-form-group>
             <b-button center variant="primary" @click="addCategory">Save</b-button>
           </b-form>
         </div>
@@ -55,7 +64,7 @@ const fb = require('../firebaseConfig.js')
 export default {
   data () {
     return {
-      fields: ['name', 'actions'],
+      fields: ['name', 'brand', 'actions'],
       searchterm: '',
       modifiedCategory: {
         name: ''
@@ -65,13 +74,18 @@ export default {
     }
   },
   computed: {
-    ...mapState(['currentUser', 'categories']),
+    ...mapState(['currentUser', 'categories', 'brands']),
     filteredCategories: function () {
       return this.categories.filter(category => {
         return category.name
           .toLowerCase()
           .trim()
           .match(this.searchterm.toLowerCase().trim())
+      })
+    },
+    brandNames: function () {
+      return this.brands.map(brand => {
+        return brand.name
       })
     }
   },
@@ -83,6 +97,7 @@ export default {
           .set(this.modifiedCategory)
           .then(doc => {
             this.modifiedCategory.name = ''
+            this.modifiedCategory.brand = ''
             this.showAddsection = false
             this.isEdit = false
           })
@@ -92,10 +107,12 @@ export default {
       } else {
         fb.categoriesCollection
           .add({
-            name: this.modifiedCategory.name
+            name: this.modifiedCategory.name,
+            brand: this.modifiedCategory.brand
           })
           .then(doc => {
             this.modifiedCategory.name = ''
+            this.modifiedCategory.brand = ''
             this.showAddsection = false
             this.isEdit = false
           })
