@@ -5,8 +5,11 @@
         <b-col cols="6" align-v="end">
           <b-form-input type="text" v-model="searchterm" placeholder="Search brands"/>
         </b-col>
-        <b-col cols="3">
+        <b-col cols="6">
           <b-button variant="primary" @click="viewAddSection">Add new brand</b-button>
+          <b-button variant="danger" @click="deleteAll">Delete All</b-button>
+          <b-button variant="secondary" @click="onPickUploadFile">Upload</b-button>
+          <input type="file" hidden @change="onImportFilePicked" ref="fileUpload" />
         </b-col>
       </b-row>
       <b-table
@@ -178,6 +181,42 @@ export default {
         this.imageFile = event.target.files[0]
       })
       this.image = fileReader.readAsDataURL(event.target.files[0])
+    },
+    deleteAll() {
+      this.brands.forEach(c => {
+        fb.brandsCollection
+          .doc(c.id)
+          .delete()
+          .catch(err => {
+            console.log(err);
+          });
+      });
+    },
+    onPickUploadFile() {
+      this.$refs.fileUpload.click();
+    },
+    onImportFilePicked(event) {
+      var reader = new FileReader();
+      reader.readAsText(event.target.files[0]);
+      var fileinput;
+      reader.onload = e => {
+        fileinput = e.target.result;
+        var lines = fileinput.split("\n");
+        // Need to create a map as, by the time response comes from firebase, the data object gets modified by next iteration
+        // Line 0 is header line
+        for (var lineNumber = 1; lineNumber < lines.length; lineNumber++) {
+          var data = lines[lineNumber];
+          console.info("Entry : " + lines[lineNumber]);
+          this.importData(data);
+        }
+      };
+    },
+    importData(data) {
+      if (data !== "") {
+        fb.brandsCollection.add({
+          name: data,
+        });
+      }
     }
   }
 }

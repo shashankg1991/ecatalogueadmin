@@ -5,7 +5,7 @@
         <b-col cols="8" align-v="end">
           <b-row>
             <b-col cols="4">
-              <b-form-input type="text" v-model="searchterm" placeholder="Search items"/>
+              <b-form-input type="text" v-model="searchterm" placeholder="Search items" />
             </b-col>
             <b-col cols="4">
               <b-form-input
@@ -23,12 +23,11 @@
             </b-col>
           </b-row>
         </b-col>
-        <b-col cols="2">
+        <b-col cols="4">
           <b-button variant="primary" @click="viewAddSection">Add new item</b-button>
-        </b-col>
-        <b-col cols="2">
-          <b-button center variant="secondary" @click="onPickUploadFile">Upload Items</b-button>
-          <input type="file" hidden @change="onImportFilePicked" ref="fileUpload">
+          <b-button variant="danger" @click="deleteAll">Delete All</b-button>
+          <b-button center variant="secondary" @click="onPickUploadFile">Upload</b-button>
+          <input type="file" hidden @change="onImportFilePicked" ref="fileUpload" />
         </b-col>
       </b-row>
 
@@ -41,11 +40,9 @@
         :fields="fields"
         class="marginTop"
       >
-      <template slot="price" slot-scope="data">
-          {{data.item.price|currency('₹')}}
-        </template>
+        <template slot="price" slot-scope="data">{{data.item.price|currency('₹')}}</template>
         <template slot="image" slot-scope="data">
-          <img :src="data.item.imageurl" width="50">
+          <img :src="data.item.imageurl" width="50" />
         </template>
         <template slot="actions" slot-scope="data">
           <b-button variant="outline-primary" @click="editItem(data.item)">Edit</b-button>
@@ -133,7 +130,7 @@
                 class="marginTop"
                 @click="onPickFile"
               >Upload Image</b-button>
-              <input type="file" accept="image/*" @change="onFilePicked" hidden ref="fileInput">
+              <input type="file" accept="image/*" @change="onFilePicked" hidden ref="fileInput" />
             </b-form-group>
             <b-button center variant="primary" @click="addItem">Save</b-button>
           </b-form>
@@ -144,44 +141,44 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
-const fb = require('../firebaseConfig.js')
+import { mapState } from "vuex";
+const fb = require("../firebaseConfig.js");
 export default {
-  data () {
+  data() {
     return {
       fields: [
-        'image',
-        'code',
-        'name',
-        'price',
-        'category',
-        'brand',
-        'description',
-        'actions'
+        "image",
+        "code",
+        "name",
+        "price",
+        "category",
+        "brand",
+        "description",
+        "actions"
       ],
-      imageUrl: '',
-      imageFile: '',
-      image: '',
-      searchterm: '',
-      searchcategoryterm: '',
-      searchbrandterm: '',
+      imageUrl: "",
+      imageFile: "",
+      image: "",
+      searchterm: "",
+      searchcategoryterm: "",
+      searchbrandterm: "",
       modifiedItem: {
-        id: '',
-        code: '',
-        name: '',
-        description: '',
-        category: '',
-        brand: '',
-        imageurl: '',
-        price: ''
+        id: "",
+        code: "",
+        name: "",
+        description: "",
+        category: "",
+        brand: "",
+        imageurl: "",
+        price: ""
       },
       showAddsection: false,
       isEdit: false
-    }
+    };
   },
   computed: {
-    ...mapState(['currentUser', 'items', 'categories', 'brands']),
-    filteredItems: function () {
+    ...mapState(["currentUser", "items", "categories", "brands"]),
+    filteredItems: function() {
       return this.items.filter(item => {
         return (
           (item.code
@@ -200,63 +197,63 @@ export default {
             .toLowerCase()
             .trim()
             .match(this.searchbrandterm.toLowerCase().trim())
-        )
-      })
+        );
+      });
     },
-    categoryNames: function () {
+    categoryNames: function() {
       return this.categories.map(category => {
-        return category.name
-      })
+        return category.name;
+      });
     },
-    brandNames: function () {
+    brandNames: function() {
       return this.brands.map(brand => {
-        return brand.name
-      })
+        return brand.name;
+      });
     }
   },
   methods: {
-    addItem () {
+    addItem() {
       if (this.imageUrl) {
         fb.storage
-          .ref('items/' + this.imageFile.name)
+          .ref("items/" + this.imageFile.name)
           .put(this.imageFile)
           .then(filedata => {
             filedata.ref.getDownloadURL().then(url => {
-              this.modifiedItem.imageurl = url
-              this.imageUrl = ''
-              this.imageFile = ''
-              this.image = ''
-              this.saveItem()
-            })
-          })
+              this.modifiedItem.imageurl = url;
+              this.imageUrl = "";
+              this.imageFile = "";
+              this.image = "";
+              this.saveItem();
+            });
+          });
       } else {
-        this.saveItem()
+        this.saveItem();
       }
     },
 
-    saveItem () {
+    saveItem() {
       if (this.isEdit) {
-        if(!this.modifiedItem.imageurl){
-          this.modifiedItem.imageurl=''
+        if (!this.modifiedItem.imageurl) {
+          this.modifiedItem.imageurl = "";
         }
         fb.itemsCollection
           .doc(this.modifiedItem.id)
           .set(this.modifiedItem)
           .then(doc => {
-            this.modifiedItem.id = ''
-            this.modifiedItem.code = ''
-            this.modifiedItem.name = ''
-            this.modifiedItem.description = ''
-            this.modifiedItem.category = ''
-            this.modifiedItem.brand = ''
-            this.modifiedItem.imageurl = ''
-            this.modifiedItem.price = ''
-            this.showAddsection = false
-            this.isEdit = false
+            this.modifiedItem.id = "";
+            this.modifiedItem.code = "";
+            this.modifiedItem.name = "";
+            this.modifiedItem.description = "";
+            this.modifiedItem.category = "";
+            this.modifiedItem.brand = "";
+            this.modifiedItem.imageurl = "";
+            this.modifiedItem.price = "";
+            this.showAddsection = false;
+            this.isEdit = false;
           })
           .catch(err => {
-            console.log(err)
-          })
+            console.log(err);
+          });
       } else {
         fb.itemsCollection
           .add({
@@ -269,101 +266,111 @@ export default {
             price: this.modifiedItem.price
           })
           .then(doc => {
-            this.modifiedItem.id = ''
-            this.modifiedItem.code = ''
-            this.modifiedItem.name = ''
-            this.modifiedItem.description = ''
-            this.modifiedItem.category = ''
-            this.modifiedItem.brand = ''
-            this.modifiedItem.imageurl = ''
-            this.modifiedItem.price = ''
-            this.showAddsection = false
-            this.isEdit = false
+            this.modifiedItem.id = "";
+            this.modifiedItem.code = "";
+            this.modifiedItem.name = "";
+            this.modifiedItem.description = "";
+            this.modifiedItem.category = "";
+            this.modifiedItem.brand = "";
+            this.modifiedItem.imageurl = "";
+            this.modifiedItem.price = "";
+            this.showAddsection = false;
+            this.isEdit = false;
           })
           .catch(err => {
-            console.log(err)
-          })
+            console.log(err);
+          });
       }
     },
 
-    editItem (item) {
-      this.isEdit = true
-      this.modifiedItem.id = item.id
-      this.modifiedItem.code = item.code
-      this.modifiedItem.name = item.name
-      this.modifiedItem.description = item.description
-      this.modifiedItem.category = item.category
-      this.modifiedItem.imageurl = item.imageurl
-      this.modifiedItem.price = item.price.trim()
-      this.modifiedItem.brand = item.brand
-      this.showAddsection = true
+    editItem(item) {
+      this.isEdit = true;
+      this.modifiedItem.id = item.id;
+      this.modifiedItem.code = item.code;
+      this.modifiedItem.name = item.name;
+      this.modifiedItem.description = item.description;
+      this.modifiedItem.category = item.category;
+      this.modifiedItem.imageurl = item.imageurl;
+      this.modifiedItem.price = item.price.trim();
+      this.modifiedItem.brand = item.brand;
+      this.showAddsection = true;
     },
-    deleteItem (id) {
+    deleteItem(id) {
       fb.itemsCollection
         .doc(id)
         .delete()
         .catch(err => {
-          console.log(err)
-        })
+          console.log(err);
+        });
     },
-    viewAddSection () {
-      this.showAddsection = true
+    viewAddSection() {
+      this.showAddsection = true;
     },
-    closePostModal () {
-      this.modifiedItem.id = ''
-      this.modifiedItem.code = ''
-      this.modifiedItem.name = ''
-      this.modifiedItem.description = ''
-      this.modifiedItem.category = ''
-      this.modifiedItem.imageurl = ''
-      this.modifiedItem.price = ''
-      this.showAddsection = false
+    closePostModal() {
+      this.modifiedItem.id = "";
+      this.modifiedItem.code = "";
+      this.modifiedItem.name = "";
+      this.modifiedItem.description = "";
+      this.modifiedItem.category = "";
+      this.modifiedItem.imageurl = "";
+      this.modifiedItem.price = "";
+      this.showAddsection = false;
     },
-    onPickFile () {
-      this.$refs.fileInput.click()
+    deleteAll() {
+      this.items.forEach(c => {
+        fb.itemsCollection
+          .doc(c.id)
+          .delete()
+          .catch(err => {
+            console.log(err);
+          });
+      });
     },
-    onFilePicked (event) {
-      const fileReader = new FileReader()
-      fileReader.addEventListener('load', () => {
-        this.imageUrl = fileReader.result
-        this.imageFile = event.target.files[0]
-      })
-      this.image = fileReader.readAsDataURL(event.target.files[0])
+    onPickFile() {
+      this.$refs.fileInput.click();
     },
-    onPickUploadFile () {
-      this.$refs.fileUpload.click()
+    onFilePicked(event) {
+      const fileReader = new FileReader();
+      fileReader.addEventListener("load", () => {
+        this.imageUrl = fileReader.result;
+        this.imageFile = event.target.files[0];
+      });
+      this.image = fileReader.readAsDataURL(event.target.files[0]);
     },
-    onImportFilePicked (event) {
-      var reader = new FileReader()
-      reader.readAsText(event.target.files[0])
-      var fileinput
+    onPickUploadFile() {
+      this.$refs.fileUpload.click();
+    },
+    onImportFilePicked(event) {
+      var reader = new FileReader();
+      reader.readAsText(event.target.files[0]);
+      var fileinput;
       reader.onload = e => {
-        fileinput = e.target.result
-        var lines = fileinput.split('\n')
+        fileinput = e.target.result;
+        var lines = fileinput.split("\n");
         // Need to create a map as, by the time response comes from firebase, the data object gets modified by next iteration
         // Line 0 is header line
         for (var lineNumber = 1; lineNumber < lines.length; lineNumber++) {
-          var data = lines[lineNumber].split(',')
-          console.info('Entry : ' + lines[lineNumber].split(','))
-          this.importData(data)
+          var data = lines[lineNumber].split(",");
+          console.info("Entry : " + lines[lineNumber].split(","));
+          this.importData(data);
         }
-      }
+      };
     },
 
-    importData (data) {
-      if (data[0] !== '' && data.length === 6) {
+    importData(data) {
+      if (data[0] !== "" && data.length === 6) {
         fb.itemsCollection
-          .where('code', '==', data[0])
+          .where("code", "==", data[0])
           .get()
           .then(querySnapshot => {
             if (querySnapshot.docs.length > 0) {
-              var existingDoc = querySnapshot.docs[0].data()
-              existingDoc.name = data[1]
-              existingDoc.description = data[2]
-              existingDoc.category = data[3]
-              existingDoc.brand = data[4]
-              existingDoc.price = data[5]
-              fb.itemsCollection.doc(querySnapshot.docs[0].id).set(existingDoc)
+              var existingDoc = querySnapshot.docs[0].data();
+              existingDoc.name = data[1];
+              existingDoc.description = data[2];
+              existingDoc.category = data[3];
+              existingDoc.brand = data[4];
+              existingDoc.price = data[5];
+              fb.itemsCollection.doc(querySnapshot.docs[0].id).set(existingDoc);
             } else {
               fb.itemsCollection
                 .add({
@@ -375,12 +382,12 @@ export default {
                   price: data[5]
                 })
                 .catch(err => {
-                  console.log(err)
-                })
+                  console.log(err);
+                });
             }
-          })
+          });
       }
     }
   }
-}
+};
 </script>
